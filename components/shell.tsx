@@ -57,7 +57,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="mt-auto space-y-4">
           <OperatorField />
           <div>
-            <p className="text-xs text-muted-foreground capitalize">{clock ? formatLongDate(clock) : "Hora del centro"}</p>
+            <p className="text-xs text-muted-foreground">{clock ? formatLongDate(clock) : "Hora del centro"}</p>
             <p className="text-3xl tabular-nums">{clock ? formatClock(clock) : "—"}</p>
           </div>
           <p className="text-[11px] leading-4 text-muted-foreground">
