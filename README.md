@@ -6,14 +6,24 @@ Vigía no abre el escritorio ni mira lo que escribe el cajero. Las órdenes son 
 
 La cadena de ejemplo es **Abarrotes Del Valle**: ocho sucursales, de Guadalajara a Mérida. Los agentes que reportan desde cada PC están simulados en el navegador, así que puedes probar la mesa sin instalar nada en una caja.
 
-## Cómo correrlo
+## Cómo abrirlo
+
+En Windows, doble clic en `Abrir Vigia.bat`. En Mac o Linux:
+
+```bash
+./abrir.sh
+```
+
+Ese programa usa npm: instala lo que falte, arranca Vigía y abre el navegador en [http://localhost:3847](http://localhost:3847).
+
+Si la computadora dice que no encuentra npm ni node, instala Node.js desde [https://nodejs.org](https://nodejs.org). Node trae npm. Después vuelve a abrir el mismo archivo.
+
+También puedes correrlo a mano:
 
 ```bash
 npm install
 npm run dev
 ```
-
-Abre [http://localhost:3847](http://localhost:3847).
 
 El nombre de quien opera se guarda en este navegador, igual que las órdenes de la demo. En **Bitácora** está **Restaurar demo** si quieres volver al estado inicial.
 
