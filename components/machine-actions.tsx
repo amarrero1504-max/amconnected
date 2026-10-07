@@ -61,7 +61,7 @@ export function MachineActions({ machine }: { machine: MachineView }) {
     : machine.maintenance
       ? "En mantenimiento solo puedes quitar el mantenimiento."
       : offline
-        ? "Sin señal: el reinicio y el inventario esperan en cola. El bloqueo y el aviso necesitan una sesión."
+        ? "Sin señal: el reinicio y el inventario esperan en cola. El escritorio, el bloqueo y el aviso necesitan una sesión."
         : null;
 
   return (

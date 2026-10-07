@@ -1,3 +1,4 @@
+import { defaultFiles } from "@/lib/desk";
 import type { Branch, Command, FleetState, Machine, Role } from "@/lib/types";
 
 type Draft = {
@@ -128,6 +129,8 @@ function machinesFor(
       rebooting: false,
       backAt: null,
       lastSeen: now - (draft.lastSeenAgoMs ?? (link === "down" ? 4 * 60 * 1000 : 4000)),
+      locked: false,
+      files: defaultFiles(draft.role, branches.find((branch) => branch.id === branchId)?.name ?? "Sucursal", draft.name),
       screenNotice: null,
     };
   });

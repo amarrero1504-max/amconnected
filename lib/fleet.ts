@@ -1,3 +1,4 @@
+import { DESK_BODY_LIMIT, DESK_FILE_LIMIT, deskBlock, nextNoteName, withDesktop } from "@/lib/desk";
 import { orderPhrase } from "@/lib/labels";
 import { createSeed } from "@/lib/seed";
 import type {
@@ -109,6 +110,7 @@ function applyCommand(
       machine.link = "down";
       machine.backAt = now + 7000;
       machine.screenNotice = null;
+      machine.locked = false;
       machine.cpu = 0;
       return {
         status: "done" as const,
@@ -117,9 +119,10 @@ function applyCommand(
         cancelOthers: false,
       };
     case "lock":
+      machine.locked = true;
       return {
         status: "done" as const,
-        result: `Sesión de ${machine.user} bloqueada.`,
+        result: `Sesión de ${machine.user} bloqueada. El escritorio pide desbloqueo.`,
         entry: logEntry(
           now,
           "ok",
@@ -425,8 +428,129 @@ export function withOperator(state: FleetState, name: string): FleetState {
   return { ...state, operator };
 }
 
+export function noteDesktop(state: FleetState, machineId: string, actor: string, now: number) {
+  const machine = state.machines.find((item) => item.id === machineId);
+  if (!machine) return { ok: false as const, error: "No encontré ese equipo." };
+  if (deskBlock(machine)) return { ok: true as const, queued: false };
+
+  const name = actor.trim() || "Mesa central";
+  const where = state.branches.find((branch) => branch.id === machine.branchId)?.name ?? "la sucursal";
+  return {
+    ok: true as const,
+    queued: false,
+    state: {
+      ...state,
+      logs: [
+        logEntry(now, "info", `${name} abrió el escritorio de ${machine.name} en ${where}.`),
+        ...state.logs,
+      ].slice(0, 80),
+    },
+  };
+}
+
+export function saveDeskFile(
+  state: FleetState,
+  machineId: string,
+  fileId: string,
+  body: string,
+  actor: string,
+  now: number,
+) {
+  const machine = state.machines.find((item) => item.id === machineId);
+  if (!machine) return { ok: false as const, error: "No encontré ese equipo." };
+  const block = deskBlock(machine);
+  if (block) return { ok: false as const, error: block };
+  if (machine.locked) return { ok: false as const, error: "La sesión está bloqueada. Desbloquéala para editar." };
+
+  const file = machine.files.find((item) => item.id === fileId);
+  if (!file) return { ok: false as const, error: "Ese archivo ya no está en el escritorio." };
+  const nextBody = body.replace(/\r\n/g, "\n");
+  if (nextBody.length > DESK_BODY_LIMIT) {
+    return { ok: false as const, error: `El archivo cabe en ${DESK_BODY_LIMIT} caracteres.` };
+  }
+  if (nextBody === file.body) return { ok: true as const, queued: false };
+
+  const name = actor.trim() || "Mesa central";
+  const where = state.branches.find((branch) => branch.id === machine.branchId)?.name ?? "la sucursal";
+  const machines = state.machines.map((item) =>
+    item.id === machineId
+      ? { ...item, files: item.files.map((entry) => (entry.id === fileId ? { ...entry, body: nextBody } : entry)) }
+      : item,
+  );
+
+  return {
+    ok: true as const,
+    queued: false,
+    state: {
+      ...state,
+      machines,
+      logs: [
+        logEntry(now, "ok", `${name} editó «${file.name}» en ${machine.name} (${where}).`),
+        ...state.logs,
+      ].slice(0, 80),
+    },
+  };
+}
+
+export function createDeskNote(state: FleetState, machineId: string, actor: string, now: number) {
+  const machine = state.machines.find((item) => item.id === machineId);
+  if (!machine) return { ok: false as const, error: "No encontré ese equipo." };
+  const block = deskBlock(machine);
+  if (block) return { ok: false as const, error: block };
+  if (machine.locked) return { ok: false as const, error: "La sesión está bloqueada. Desbloquéala para editar." };
+  if (machine.files.length >= DESK_FILE_LIMIT) {
+    return { ok: false as const, error: "Este escritorio ya tiene 8 archivos. Edita uno de los que están." };
+  }
+
+  const file = { id: uid("nota"), name: nextNoteName(machine.files), body: "" };
+  const name = actor.trim() || "Mesa central";
+  const where = state.branches.find((branch) => branch.id === machine.branchId)?.name ?? "la sucursal";
+  const machines = state.machines.map((item) =>
+    item.id === machineId ? { ...item, files: [...item.files, file] } : item,
+  );
+
+  return {
+    ok: true as const,
+    queued: false,
+    fileId: file.id,
+    state: {
+      ...state,
+      machines,
+      logs: [
+        logEntry(now, "info", `${name} creó «${file.name}» en el escritorio de ${machine.name} (${where}).`),
+        ...state.logs,
+      ].slice(0, 80),
+    },
+  };
+}
+
+export function unlockSession(state: FleetState, machineId: string, actor: string, now: number) {
+  const machine = state.machines.find((item) => item.id === machineId);
+  if (!machine) return { ok: false as const, error: "No encontré ese equipo." };
+  const block = deskBlock(machine);
+  if (block) return { ok: false as const, error: block };
+  if (!machine.locked) return { ok: false as const, error: "La sesión ya está abierta." };
+
+  const name = actor.trim() || "Mesa central";
+  const where = state.branches.find((branch) => branch.id === machine.branchId)?.name ?? "la sucursal";
+  const machines = state.machines.map((item) => (item.id === machineId ? { ...item, locked: false } : item));
+
+  return {
+    ok: true as const,
+    queued: false,
+    state: {
+      ...state,
+      machines,
+      logs: [
+        logEntry(now, "ok", `${name} desbloqueó la sesión de ${machine.user} en ${machine.name} (${where}).`),
+        ...state.logs,
+      ].slice(0, 80),
+    },
+  };
+}
+
 export function freshFleet(now: number) {
-  return createSeed(now);
+  return withDesktop(createSeed(now));
 }
 
 export function isFleetState(value: unknown): value is FleetState {

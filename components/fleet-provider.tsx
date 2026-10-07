@@ -1,15 +1,20 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { withDesktop } from "@/lib/desk";
 import {
+  createDeskNote,
   enqueueCommand,
   fleetStats,
   freshFleet,
   isFleetState,
   machineViews,
   markOnline,
+  noteDesktop,
   recordDiskCleanup,
+  saveDeskFile,
   tick,
+  unlockSession,
   withOperator,
 } from "@/lib/fleet";
 import type { ActionResult, Branch, Command, CommandKind, FleetStats, LogEntry, MachineView } from "@/lib/types";
@@ -29,6 +34,10 @@ type FleetApi = {
   enqueue: (input: { machineId: string; kind: CommandKind; message?: string }) => ActionResult;
   registerSignal: (machineId: string) => ActionResult;
   registerDiskCleanup: (machineId: string) => ActionResult;
+  openDesktop: (machineId: string) => ActionResult;
+  saveFile: (machineId: string, fileId: string, body: string) => ActionResult;
+  createNote: (machineId: string) => ActionResult & { fileId?: string };
+  unlock: (machineId: string) => ActionResult;
   setOperator: (name: string) => void;
   reset: () => void;
 };
@@ -77,7 +86,7 @@ export function FleetProvider({ children }: { children: ReactNode }) {
       notice = "No pude leer el guardado local. Volví a cargar la flota de ejemplo.";
     }
 
-    const base = restored ?? freshFleet(now);
+    const base = withDesktop(restored ?? freshFleet(now));
     commit(
       {
         ...base,
@@ -139,6 +148,51 @@ export function FleetProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  const openDesktop = useCallback(
+    (machineId: string) => {
+      const current = stateRef.current;
+      if (!current) return { ok: false as const, error: "Sigue cargando la flota." };
+      const result = noteDesktop(current, machineId, current.operator, Date.now());
+      if (result.ok && result.state) commit(result.state);
+      return result.ok ? { ok: true as const, queued: false } : { ok: false as const, error: result.error };
+    },
+    [commit],
+  );
+
+  const saveFile = useCallback(
+    (machineId: string, fileId: string, body: string) => {
+      const current = stateRef.current;
+      if (!current) return { ok: false as const, error: "Sigue cargando la flota." };
+      const result = saveDeskFile(current, machineId, fileId, body, current.operator, Date.now());
+      if (result.ok && result.state) commit(result.state);
+      return result.ok ? { ok: true as const, queued: false } : { ok: false as const, error: result.error };
+    },
+    [commit],
+  );
+
+  const createNote = useCallback(
+    (machineId: string) => {
+      const current = stateRef.current;
+      if (!current) return { ok: false as const, error: "Sigue cargando la flota." };
+      const result = createDeskNote(current, machineId, current.operator, Date.now());
+      if (result.ok && result.state) commit(result.state);
+      if (!result.ok) return { ok: false as const, error: result.error };
+      return { ok: true as const, queued: false, fileId: result.fileId };
+    },
+    [commit],
+  );
+
+  const unlock = useCallback(
+    (machineId: string) => {
+      const current = stateRef.current;
+      if (!current) return { ok: false as const, error: "Sigue cargando la flota." };
+      const result = unlockSession(current, machineId, current.operator, Date.now());
+      if (result.ok && result.state) commit(result.state);
+      return result.ok ? { ok: true as const, queued: false } : { ok: false as const, error: result.error };
+    },
+    [commit],
+  );
+
   const setOperator = useCallback(
     (name: string) => {
       const current = stateRef.current;
@@ -167,6 +221,10 @@ export function FleetProvider({ children }: { children: ReactNode }) {
         enqueue,
         registerSignal,
         registerDiskCleanup,
+        openDesktop,
+        saveFile,
+        createNote,
+        unlock,
         setOperator,
         reset,
       };
@@ -185,10 +243,14 @@ export function FleetProvider({ children }: { children: ReactNode }) {
       enqueue,
       registerSignal,
       registerDiskCleanup,
+      openDesktop,
+      saveFile,
+      createNote,
+      unlock,
       setOperator,
       reset,
     };
-  }, [store, enqueue, registerSignal, registerDiskCleanup, setOperator, reset]);
+  }, [store, enqueue, registerSignal, registerDiskCleanup, openDesktop, saveFile, createNote, unlock, setOperator, reset]);
 
   return <FleetContext.Provider value={api}>{children}</FleetContext.Provider>;
 }

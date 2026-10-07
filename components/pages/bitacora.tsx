@@ -39,7 +39,8 @@ export function Bitacora() {
           <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Bitácora</p>
           <h1 className="mt-1 text-4xl">Qué se hizo y qué pasó</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Cada reinicio, bloqueo, aviso y corte de señal queda anotado con el nombre de quien opera.
+            Cada escritorio que abres, archivo que editas, reinicio, bloqueo y corte de señal queda anotado con el
+            nombre de quien opera.
           </p>
         </div>
         <Button variant="outline" onClick={() => setOpen(true)}>

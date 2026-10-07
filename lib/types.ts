@@ -23,6 +23,12 @@ export type Branch = {
   hours: string;
 };
 
+export type DeskFile = {
+  id: string;
+  name: string;
+  body: string;
+};
+
 export type Machine = {
   id: string;
   branchId: string;
@@ -43,6 +49,8 @@ export type Machine = {
   rebooting: boolean;
   backAt: number | null;
   lastSeen: number;
+  locked: boolean;
+  files: DeskFile[];
   screenNotice: { text: string; until: number } | null;
 };
 

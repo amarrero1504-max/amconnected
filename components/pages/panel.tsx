@@ -39,8 +39,8 @@ export function Panel() {
         <h1 className="mt-1 text-4xl text-balance">{hello}.</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Operas como {fleet.operator}. {fleet.stats.branches} sucursales y {fleet.stats.total} equipos.
-          Desde aquí reinicias, bloqueas la sesión, dejas un aviso o pides el inventario. Vigía no abre el escritorio
-          ni ve lo que escriben.
+          Desde aquí abres el escritorio de cada equipo, editas sus archivos, reinicias, bloqueas la sesión o dejas un
+          aviso.
         </p>
       </header>
 

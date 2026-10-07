@@ -1,8 +1,6 @@
 # Vigía
 
-Mesa de control para las computadoras de tus sucursales. Ves cuáles están en línea, cuáles perdieron la señal y cuáles traen el disco lleno. Desde el mismo panel puedes reiniciar un equipo, bloquear la sesión, dejar un aviso en pantalla o pedir el inventario.
-
-Vigía no abre el escritorio ni mira lo que escribe el cajero. Las órdenes son solo esas.
+Mesa de control para las computadoras de tus sucursales. Ves cuáles están en línea, cuáles perdieron la señal y cuáles traen el disco lleno. Desde el mismo panel abres el escritorio de un equipo, ves lo que está en pantalla, editas sus archivos, reinicias, bloqueas la sesión, dejas un aviso o pides el inventario. Cada cambio queda en la bitácora con el nombre de quien opera.
 
 La cadena de ejemplo es **Abarrotes Del Valle**: ocho sucursales, de Guadalajara a Mérida. Los agentes que reportan desde cada PC están simulados en el navegador, así que puedes probar la mesa sin instalar nada en una caja.
 
@@ -31,6 +29,7 @@ El nombre de quien opera se guarda en este navegador, igual que las órdenes de 
 
 - Ver la flota: en línea, sin señal, alerta de disco o procesador, y mantenimiento.
 - Entrar a una sucursal y de ahí a cada equipo.
+- Abrir el escritorio: la pantalla de la sesión, los archivos de trabajo y un editor para cambiarlos. Si la sesión está bloqueada, desde ahí mismo se desbloquea.
 - Reiniciar. Si no hay señal, la orden espera en cola y sale cuando el equipo vuelve.
 - Bloquear la sesión de Windows del cajero.
 - Dejar un aviso en pantalla.
@@ -40,4 +39,4 @@ El nombre de quien opera se guarda en este navegador, igual que las órdenes de 
 
 ## Cómo se conectaría de verdad
 
-En cada computadora de sucursal se instala un programa que tú controlas. Ese programa avisa si está encendido y solo ejecuta la lista de órdenes de arriba. Esta demo simula esos reportes en el navegador para que la mesa se pueda usar de una vez. No incluye acceso remoto a la pantalla, al teclado ni a los archivos.
+En cada computadora de sucursal se instala el agente de Vigía, el programa que pones en tus propias cajas. Comparte con esta mesa si está encendido, la pantalla de la sesión y los archivos de trabajo, y anota cada cambio. Esta demo simula ese agente en el navegador, con la cadena de ejemplo, para que puedas usar el escritorio de una vez.

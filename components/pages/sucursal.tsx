@@ -61,17 +61,26 @@ export function Sucursal({ id }: { id: string }) {
       <ul className="mt-6 divide-y divide-border overflow-hidden rounded-2xl bg-card ring-1 ring-foreground/10">
         {machines.map((machine) => (
           <li key={machine.id}>
-            <Link href={`/equipos/${machine.id}`} className="flex items-start justify-between gap-3 px-4 py-4 hover:bg-accent/60">
-              <div className="min-w-0">
+            <div className="flex items-start justify-between gap-3 px-4 py-4">
+              <Link href={`/equipos/${machine.id}`} className="min-w-0 flex-1 rounded-lg hover:text-primary">
                 <p className="font-medium">{machine.name}</p>
                 <p className="text-xs text-muted-foreground">
                   {ROLE_LABEL[machine.role]} · {machine.user} · visto {formatRelative(machine.lastSeen, now)}
                 </p>
-                {machine.issue ? <p className="mt-1 text-sm">{machine.issue}</p> : null}
+                {machine.issue ? <p className="mt-1 text-sm text-foreground">{machine.issue}</p> : null}
                 {machine.note ? <p className="mt-1 text-sm text-muted-foreground">{machine.note}</p> : null}
+              </Link>
+              <div className="flex flex-col items-end gap-2">
+                <StatusPill status={machine.status} />
+                <Link
+                  href={`/equipos/${machine.id}/escritorio`}
+                  className="text-xs text-primary"
+                  onClick={() => fleet.openDesktop(machine.id)}
+                >
+                  Escritorio
+                </Link>
               </div>
-              <StatusPill status={machine.status} />
-            </Link>
+            </div>
           </li>
         ))}
       </ul>

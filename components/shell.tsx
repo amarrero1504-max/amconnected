@@ -61,7 +61,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <p className="text-3xl tabular-nums">{clock ? formatClock(clock) : "—"}</p>
           </div>
           <p className="text-[11px] leading-4 text-muted-foreground">
-            En esta demo los agentes de las sucursales están simulados.
+            En esta demo el escritorio y los agentes de las sucursales están simulados.
           </p>
         </div>
       </aside>
@@ -77,13 +77,30 @@ export function Shell({ children }: { children: ReactNode }) {
         {fleet.storageError ? (
           <p className="bg-alert/15 px-4 py-2 text-sm text-foreground">{fleet.storageError}</p>
         ) : null}
-        <main className="mx-auto w-full max-w-6xl px-4 py-5 pb-24 md:px-8 md:py-8 md:pb-10">{children}</main>
+        <Suspense fallback={<main className="mx-auto w-full max-w-6xl px-4 py-5 pb-24 md:px-8 md:py-8 md:pb-10">{children}</main>}>
+          <ShellMain>{children}</ShellMain>
+        </Suspense>
       </div>
 
       <Suspense fallback={<SectionNav variant="bottom" pathname={null} />}>
         <PathSectionNav variant="bottom" />
       </Suspense>
     </div>
+  );
+}
+
+function ShellMain({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const desk = pathname.includes("/escritorio");
+  return (
+    <main
+      className={cn(
+        "mx-auto w-full px-4 py-5 pb-24 md:py-8 md:pb-10",
+        desk ? "max-w-none md:px-6" : "max-w-6xl md:px-8",
+      )}
+    >
+      {children}
+    </main>
   );
 }
 

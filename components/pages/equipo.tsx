@@ -5,6 +5,7 @@ import { CommandList } from "@/components/command-list";
 import { FleetSkeleton } from "@/components/fleet-skeleton";
 import { useFleet } from "@/components/fleet-provider";
 import { MachineActions } from "@/components/machine-actions";
+import { buttonVariants } from "@/components/ui/button";
 import { MetricBar, metricTone } from "@/components/metric-bar";
 import { Missing } from "@/components/missing";
 import { StatusPill } from "@/components/status-pill";
@@ -53,6 +54,22 @@ export function Equipo({ id }: { id: string }) {
         <p className="mt-5 rounded-2xl bg-alert/15 px-4 py-3 text-sm">{machine.issue}</p>
       ) : null}
       {machine.note ? <p className="mt-3 text-sm text-muted-foreground">{machine.note}</p> : null}
+      <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-card px-4 py-4 ring-1 ring-foreground/10">
+        <div className="max-w-xl">
+          <h2 className="text-xl">Escritorio</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            La pantalla de {machine.user}, los archivos del equipo y un lugar para editarlos.
+          </p>
+        </div>
+        <Link
+          href={`/equipos/${machine.id}/escritorio`}
+          className={buttonVariants()}
+          onClick={() => fleet.openDesktop(machine.id)}
+        >
+          Abrir escritorio
+        </Link>
+      </section>
+
       {machine.screenNotice ? (
         <div className="mt-4 rounded-2xl bg-primary/10 px-4 py-3 ring-1 ring-primary/20">
           <p className="text-xs tracking-[0.14em] text-primary uppercase">Aviso en pantalla</p>
@@ -91,7 +108,7 @@ export function Equipo({ id }: { id: string }) {
           <CardContent>
             <h2 className="text-xl">Órdenes</h2>
             <p className="mt-1 mb-4 text-xs text-muted-foreground">
-              Solo estas. No hay escritorio remoto ni acceso a archivos.
+              Reinicio, bloqueo, aviso e inventario. El escritorio está arriba.
             </p>
             <MachineActions machine={machine} />
           </CardContent>
