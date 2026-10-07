@@ -36,8 +36,10 @@ function LiveDesktop({ machine }: { machine: MachineView }) {
       if (current.some((win) => win.id === id)) {
         return current.map((win) => (win.id === id ? { ...win, z: top } : win));
       }
+      const wide = window.matchMedia("(min-width: 960px)").matches;
       const step = current.length;
-      return [...current, { id, x: 16 + step * 18, y: 12 + step * 16, z: top }];
+      const spot = wide ? { x: 280 + step * 24, y: 18 + step * 16 } : { x: 8, y: 8 + step * 14 };
+      return [...current, { id, ...spot, z: top }];
     });
   }
 

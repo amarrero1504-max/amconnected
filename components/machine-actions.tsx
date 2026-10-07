@@ -195,7 +195,7 @@ function bodyFor(dialog: DialogKind, machine: MachineView) {
         ? `${machine.name} no tiene señal. La orden espera y se aplica cuando vuelva a reportar.`
         : `Se reinicia ${machine.name} en ${machine.branch.name}. La caja se queda sin sistema unos segundos.`;
     case "lock":
-      return `Quien esté en la sesión ${machine.user} va a ver el bloqueo de Windows y tiene que volver a entrar.`;
+      return `La sesión de ${machine.user} queda en la pantalla de bloqueo. Desde el escritorio la vuelves a abrir.`;
     case "message":
       return `El texto aparece en la pantalla de ${machine.name} unos minutos. No muestra lo que escribe el cajero.`;
     case "maintenance_on":
