@@ -1,9 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { LayoutDashboard, Monitor, ScrollText, Store } from "lucide-react";
 import { useFleet } from "@/components/fleet-provider";
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,6 @@ function isActive(pathname: string, href: string) {
 }
 
 export function Shell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
   const fleet = useFleet();
   const clock = useMexicoClock();
   const pending = fleet.commands.filter(
@@ -48,26 +46,9 @@ export function Shell({ children }: { children: ReactNode }) {
           <br />
           Mesa de control
         </p>
-        <nav aria-label="Secciones" className="mt-8 flex flex-col gap-1">
-          {items.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm",
-                  active ? "bg-primary text-primary-foreground" : "hover:bg-sidebar-accent",
-                )}
-              >
-                <Icon className="size-4" aria-hidden />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <Suspense fallback={<SectionNav variant="side" pathname={null} />}>
+          <PathSectionNav variant="side" />
+        </Suspense>
         {pending > 0 ? (
           <p className="mt-4 px-2.5 text-xs text-muted-foreground">
             {pending === 1 ? "1 orden en camino" : `${pending} órdenes en camino`}
@@ -99,30 +80,55 @@ export function Shell({ children }: { children: ReactNode }) {
         <main className="mx-auto w-full max-w-6xl px-4 py-5 pb-24 md:px-8 md:py-8 md:pb-10">{children}</main>
       </div>
 
-      <nav
-        aria-label="Secciones"
-        className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-background/95 backdrop-blur md:hidden"
-      >
-        {items.map((item) => {
-          const Icon = item.icon;
-          const active = isActive(pathname, item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex flex-col items-center gap-1 px-1 py-2 text-[11px]",
-                active ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              <Icon className="size-4" aria-hidden />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <Suspense fallback={<SectionNav variant="bottom" pathname={null} />}>
+        <PathSectionNav variant="bottom" />
+      </Suspense>
     </div>
+  );
+}
+
+function PathSectionNav({ variant }: { variant: "side" | "bottom" }) {
+  const pathname = usePathname();
+  return <SectionNav variant={variant} pathname={pathname} />;
+}
+
+function SectionNav({ variant, pathname }: { variant: "side" | "bottom"; pathname: string | null }) {
+  return (
+    <nav
+      aria-label="Secciones"
+      className={
+        variant === "side"
+          ? "mt-8 flex flex-col gap-1"
+          : "fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-background/95 backdrop-blur md:hidden"
+      }
+    >
+      {items.map((item) => {
+        const Icon = item.icon;
+        const active = pathname ? isActive(pathname, item.href) : false;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              variant === "side"
+                ? "flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm"
+                : "flex flex-col items-center gap-1 px-1 py-2 text-[11px]",
+              active
+                ? variant === "side"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-primary"
+                : variant === "side"
+                  ? "hover:bg-sidebar-accent"
+                  : "text-muted-foreground",
+            )}
+          >
+            <Icon className="size-4" aria-hidden />
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 
