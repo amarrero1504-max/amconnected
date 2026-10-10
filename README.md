@@ -29,7 +29,7 @@ El nombre de quien opera se guarda en este navegador, igual que las órdenes de 
 
 - Ver la flota: en línea, sin señal, alerta de disco o procesador, y mantenimiento.
 - Entrar a una sucursal y de ahí a cada equipo.
-- Abrir el escritorio: la pantalla de la sesión, los archivos de trabajo y un editor para cambiarlos. Si la sesión está bloqueada, desde ahí mismo se desbloquea.
+- Conectar: el mouse y el teclado pasan a esa computadora. Puedes escribir en la pantalla, cambiar archivos y eliminarlos. Si la sesión está bloqueada, desde ahí mismo se desbloquea.
 - Reiniciar. Si no hay señal, la orden espera en cola y sale cuando el equipo vuelve.
 - Bloquear la sesión de Windows del cajero.
 - Dejar un aviso en pantalla.

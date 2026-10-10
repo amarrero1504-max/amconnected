@@ -51,6 +51,7 @@ export type Machine = {
   lastSeen: number;
   locked: boolean;
   files: DeskFile[];
+  screenText: string | null;
   screenNotice: { text: string; until: number } | null;
 };
 

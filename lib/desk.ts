@@ -189,6 +189,7 @@ export function withDesktop<T extends { branches: { id: string; name: string }[]
         ...machine,
         locked: machine.locked === true,
         files: validFiles(machine.files) ?? defaultFiles(machine.role, branch, machine.name),
+        screenText: typeof machine.screenText === "string" ? machine.screenText.slice(0, DESK_BODY_LIMIT) : null,
       };
     }),
   };

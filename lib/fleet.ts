@@ -524,6 +524,65 @@ export function createDeskNote(state: FleetState, machineId: string, actor: stri
   };
 }
 
+export function deleteDeskFile(state: FleetState, machineId: string, fileId: string, actor: string, now: number) {
+  const machine = state.machines.find((item) => item.id === machineId);
+  if (!machine) return { ok: false as const, error: "No encontré ese equipo." };
+  const block = deskBlock(machine);
+  if (block) return { ok: false as const, error: block };
+  if (machine.locked) return { ok: false as const, error: "La sesión está bloqueada. Desbloquéala para borrar." };
+  const file = machine.files.find((item) => item.id === fileId);
+  if (!file) return { ok: false as const, error: "Ese archivo ya no está en el equipo." };
+
+  const name = actor.trim() || "Mesa central";
+  const where = state.branches.find((branch) => branch.id === machine.branchId)?.name ?? "la sucursal";
+  const machines = state.machines.map((item) =>
+    item.id === machineId ? { ...item, files: item.files.filter((entry) => entry.id !== fileId) } : item,
+  );
+
+  return {
+    ok: true as const,
+    queued: false,
+    state: {
+      ...state,
+      machines,
+      logs: [
+        logEntry(now, "warn", `${name} eliminó «${file.name}» en ${machine.name} (${where}).`),
+        ...state.logs,
+      ].slice(0, 80),
+    },
+  };
+}
+
+export function saveHostScreen(state: FleetState, machineId: string, body: string, actor: string, now: number) {
+  const machine = state.machines.find((item) => item.id === machineId);
+  if (!machine) return { ok: false as const, error: "No encontré ese equipo." };
+  const block = deskBlock(machine);
+  if (block) return { ok: false as const, error: block };
+  if (machine.locked) return { ok: false as const, error: "La sesión está bloqueada. Desbloquéala para editar." };
+  const nextBody = body.replace(/\r\n/g, "\n");
+  if (nextBody.length > DESK_BODY_LIMIT) {
+    return { ok: false as const, error: `La pantalla cabe en ${DESK_BODY_LIMIT} caracteres.` };
+  }
+  if (nextBody === (machine.screenText ?? "")) return { ok: true as const, queued: false };
+
+  const name = actor.trim() || "Mesa central";
+  const where = state.branches.find((branch) => branch.id === machine.branchId)?.name ?? "la sucursal";
+  const machines = state.machines.map((item) => (item.id === machineId ? { ...item, screenText: nextBody } : item));
+
+  return {
+    ok: true as const,
+    queued: false,
+    state: {
+      ...state,
+      machines,
+      logs: [
+        logEntry(now, "ok", `${name} modificó la pantalla de ${machine.user} en ${machine.name} (${where}).`),
+        ...state.logs,
+      ].slice(0, 80),
+    },
+  };
+}
+
 export function unlockSession(state: FleetState, machineId: string, actor: string, now: number) {
   const machine = state.machines.find((item) => item.id === machineId);
   if (!machine) return { ok: false as const, error: "No encontré ese equipo." };

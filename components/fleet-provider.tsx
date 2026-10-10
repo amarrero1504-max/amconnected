@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { withDesktop } from "@/lib/desk";
 import {
   createDeskNote,
+  deleteDeskFile,
   enqueueCommand,
   fleetStats,
   freshFleet,
@@ -13,6 +14,7 @@ import {
   noteDesktop,
   recordDiskCleanup,
   saveDeskFile,
+  saveHostScreen,
   tick,
   unlockSession,
   withOperator,
@@ -36,6 +38,8 @@ type FleetApi = {
   registerDiskCleanup: (machineId: string) => ActionResult;
   openDesktop: (machineId: string) => ActionResult;
   saveFile: (machineId: string, fileId: string, body: string) => ActionResult;
+  deleteFile: (machineId: string, fileId: string) => ActionResult;
+  saveScreen: (machineId: string, body: string) => ActionResult;
   createNote: (machineId: string) => ActionResult & { fileId?: string };
   unlock: (machineId: string) => ActionResult;
   setOperator: (name: string) => void;
@@ -170,6 +174,28 @@ export function FleetProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  const deleteFile = useCallback(
+    (machineId: string, fileId: string) => {
+      const current = stateRef.current;
+      if (!current) return { ok: false as const, error: "Sigue cargando la flota." };
+      const result = deleteDeskFile(current, machineId, fileId, current.operator, Date.now());
+      if (result.ok && result.state) commit(result.state);
+      return result.ok ? { ok: true as const, queued: false } : { ok: false as const, error: result.error };
+    },
+    [commit],
+  );
+
+  const saveScreen = useCallback(
+    (machineId: string, body: string) => {
+      const current = stateRef.current;
+      if (!current) return { ok: false as const, error: "Sigue cargando la flota." };
+      const result = saveHostScreen(current, machineId, body, current.operator, Date.now());
+      if (result.ok && result.state) commit(result.state);
+      return result.ok ? { ok: true as const, queued: false } : { ok: false as const, error: result.error };
+    },
+    [commit],
+  );
+
   const createNote = useCallback(
     (machineId: string) => {
       const current = stateRef.current;
@@ -223,6 +249,8 @@ export function FleetProvider({ children }: { children: ReactNode }) {
         registerDiskCleanup,
         openDesktop,
         saveFile,
+        deleteFile,
+        saveScreen,
         createNote,
         unlock,
         setOperator,
@@ -245,12 +273,14 @@ export function FleetProvider({ children }: { children: ReactNode }) {
       registerDiskCleanup,
       openDesktop,
       saveFile,
+      deleteFile,
+      saveScreen,
       createNote,
       unlock,
       setOperator,
       reset,
     };
-  }, [store, enqueue, registerSignal, registerDiskCleanup, openDesktop, saveFile, createNote, unlock, setOperator, reset]);
+  }, [store, enqueue, registerSignal, registerDiskCleanup, openDesktop, saveFile, deleteFile, saveScreen, createNote, unlock, setOperator, reset]);
 
   return <FleetContext.Provider value={api}>{children}</FleetContext.Provider>;
 }

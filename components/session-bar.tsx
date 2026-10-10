@@ -410,9 +410,9 @@ export function SessionBar({
           ) : null}
           {tool === "help" ? (
             <p className="leading-6 text-slate-600">
-              Desconectar cierra la sesión. Información muestra el equipo. El aviso queda en la pantalla del usuario.
-              Archivos y la búsqueda abren sus documentos. Marcar dibuja encima un momento. Guardar pantalla deja una
-              nota. La flecha de la derecha repliega esta barra.
+              El mouse y el teclado controlan la sesión de este equipo: escribes, cambias y borras lo que está en
+              pantalla. Desconectar cierra el control. Supr elimina el archivo que esté seleccionado. La flecha de la
+              derecha repliega esta barra.
             </p>
           ) : null}
         </div>
