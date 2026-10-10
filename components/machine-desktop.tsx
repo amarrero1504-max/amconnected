@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState, type PointerEvent, type ReactNode } from "react";
+import { useRef, useState, type PointerEvent, type ReactNode, type RefObject } from "react";
 import Link from "next/link";
 import { FileText, Monitor, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useFleet } from "@/components/fleet-provider";
+import { SessionBar } from "@/components/session-bar";
 import { Button } from "@/components/ui/button";
 import { DESK_BODY_LIMIT, deskBlock, screenOf } from "@/lib/desk";
 import { formatClock } from "@/lib/format";
@@ -13,20 +14,45 @@ import type { DeskFile, MachineView } from "@/lib/types";
 const SCREEN = "pantalla";
 
 type Win = { id: string; x: number; y: number; z: number };
+type Point = { x: number; y: number };
 
 export function MachineDesktop({ machine }: { machine: MachineView }) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const block = deskBlock(machine);
-  if (block) return <DarkScreen machine={machine} title="Sin imagen" body={block} />;
-  if (machine.locked) return <LockScreen machine={machine} />;
-  return <LiveDesktop machine={machine} />;
+  return (
+    <div ref={rootRef} className="bg-white">
+      {block ? (
+        <>
+          <SessionBar machine={machine} rootRef={rootRef} />
+          <DarkScreen machine={machine} title="Sin imagen" body={block} />
+        </>
+      ) : machine.locked ? (
+        <>
+          <SessionBar machine={machine} rootRef={rootRef} />
+          <LockScreen machine={machine} />
+        </>
+      ) : (
+        <LiveDesktop machine={machine} rootRef={rootRef} />
+      )}
+    </div>
+  );
 }
 
-function LiveDesktop({ machine }: { machine: MachineView }) {
+function LiveDesktop({
+  machine,
+  rootRef,
+}: {
+  machine: MachineView;
+  rootRef: RefObject<HTMLDivElement | null>;
+}) {
   const fleet = useFleet();
   const stageRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: string; ox: number; oy: number } | null>(null);
+  const stroke = useRef<Point[] | null>(null);
   const [windows, setWindows] = useState<Win[]>([{ id: SCREEN, x: 16, y: 12, z: 1 }]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [drawing, setDrawing] = useState(false);
+  const [marks, setMarks] = useState<Point[][]>([]);
   const scene = screenOf(machine, machine.branch.name);
   const clock = formatClock(new Date(fleet.now));
 
@@ -96,12 +122,28 @@ function LiveDesktop({ machine }: { machine: MachineView }) {
     drag.current = null;
   }
 
+  function pointOf(event: PointerEvent<SVGSVGElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  }
+
   return (
+    <>
+    <SessionBar
+      machine={machine}
+      rootRef={rootRef}
+      drawing={drawing}
+      onOpenFile={openFile}
+      onNewNote={addNote}
+      onShowScreen={() => raise(SCREEN)}
+      onToggleDraw={() => setDrawing((value) => !value)}
+      onClearDraw={() => setMarks([])}
+    />
     <Frame
       caption={
         <span className="inline-flex items-center gap-2">
           <span className="dot-live size-2 rounded-full bg-online" />
-          En vivo · {machine.branch.name} · {machine.name}
+          En vivo · {machine.user}
         </span>
       }
     >
@@ -200,6 +242,39 @@ function LiveDesktop({ machine }: { machine: MachineView }) {
               </section>
             );
           })}
+          {drawing ? (
+            <svg
+              className="absolute inset-0 z-30 touch-none"
+              aria-label="Marcas sobre la pantalla"
+              onPointerDown={(event) => {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                const next = [pointOf(event)];
+                stroke.current = next;
+                setMarks((current) => [...current, next]);
+              }}
+              onPointerMove={(event) => {
+                if (!stroke.current) return;
+                const next = [...stroke.current, pointOf(event)];
+                stroke.current = next;
+                setMarks((current) => current.map((item, index) => (index === current.length - 1 ? next : item)));
+              }}
+              onPointerUp={() => {
+                stroke.current = null;
+              }}
+            >
+              {marks.map((mark, index) => (
+                <polyline
+                  key={index}
+                  points={mark.map((point) => `${point.x},${point.y}`).join(" ")}
+                  fill="none"
+                  stroke="#f5d76e"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              ))}
+            </svg>
+          ) : null}
           <div className="absolute inset-x-0 bottom-0 z-40 flex items-center gap-2 bg-black/40 px-3 py-2 text-xs text-white backdrop-blur-sm">
             <span className="rounded-md bg-white/15 px-2 py-1">Del Valle</span>
             <span className="min-w-0 flex-1 truncate">{machine.user}</span>
@@ -208,6 +283,7 @@ function LiveDesktop({ machine }: { machine: MachineView }) {
         </div>
       </div>
     </Frame>
+    </>
   );
 }
 
