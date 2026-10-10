@@ -1,6 +1,6 @@
 # Vigía
 
-Mesa de control para las computadoras de tus sucursales. Ves cuáles están en línea, cuáles perdieron la señal y cuáles traen el disco lleno. Desde el mismo panel abres el escritorio de un equipo, ves lo que está en pantalla, editas sus archivos, reinicias, bloqueas la sesión, dejas un aviso o pides el inventario. Cada cambio queda en la bitácora con el nombre de quien opera.
+Consola para las computadoras de tus sucursales. La lista de equipos muestra cuáles están en línea y cuáles van desconectados. **Conectar** abre el escritorio: ves la pantalla, editas los archivos, reinicias, bloqueas la sesión, dejas un aviso o pides el inventario. Cada cambio queda en los registros con el nombre de quien opera.
 
 La cadena de ejemplo es **Abarrotes Del Valle**: ocho sucursales, de Guadalajara a Mérida. Los agentes que reportan desde cada PC están simulados en el navegador, así que puedes probar la mesa sin instalar nada en una caja.
 

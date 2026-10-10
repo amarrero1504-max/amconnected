@@ -66,7 +66,7 @@ export function Equipo({ id }: { id: string }) {
           className={buttonVariants()}
           onClick={() => fleet.openDesktop(machine.id)}
         >
-          Abrir escritorio
+          Conectar
         </Link>
       </section>
 

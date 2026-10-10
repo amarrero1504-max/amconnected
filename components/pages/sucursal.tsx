@@ -77,7 +77,7 @@ export function Sucursal({ id }: { id: string }) {
                   className="text-xs text-primary"
                   onClick={() => fleet.openDesktop(machine.id)}
                 >
-                  Escritorio
+                  Conectar
                 </Link>
               </div>
             </div>

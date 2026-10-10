@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Monitor, ScrollText, Store } from "lucide-react";
+import { FolderOpen, LayoutDashboard, Menu, Monitor, ScrollText, Store, X } from "lucide-react";
 import { useFleet } from "@/components/fleet-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,75 +15,105 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { formatClock, formatLongDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { href: "/", label: "Panel", icon: LayoutDashboard },
-  { href: "/sucursales", label: "Sucursales", icon: Store },
-  { href: "/equipos", label: "Equipos", icon: Monitor },
-  { href: "/bitacora", label: "Bitácora", icon: ScrollText },
+  {
+    href: "/equipos",
+    label: "Equipos",
+    short: "Equipos",
+    icon: Monitor,
+    active: (pathname: string) => pathname === "/equipos" || pathname.startsWith("/equipos/"),
+  },
+  {
+    href: "/archivos",
+    label: "Acceso a archivos",
+    short: "Archivos",
+    icon: FolderOpen,
+    active: (pathname: string) => pathname.startsWith("/archivos"),
+  },
+  {
+    href: "/sucursales",
+    label: "Sucursales",
+    short: "Sucursales",
+    icon: Store,
+    active: (pathname: string) => pathname.startsWith("/sucursales"),
+  },
+  {
+    href: "/bitacora",
+    label: "Registros",
+    short: "Registros",
+    icon: ScrollText,
+    active: (pathname: string) => pathname.startsWith("/bitacora"),
+  },
+  {
+    href: "/resumen",
+    label: "Resumen",
+    short: "Resumen",
+    icon: LayoutDashboard,
+    active: (pathname: string) => pathname.startsWith("/resumen"),
+  },
 ];
-
-function isActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
 
 export function Shell({ children }: { children: ReactNode }) {
   const fleet = useFleet();
-  const clock = useMexicoClock();
-  const pending = fleet.commands.filter(
-    (command) => command.status === "queued" || command.status === "running",
-  ).length;
+  const [menu, setMenu] = useState(false);
 
   return (
-    <div className="min-h-dvh md:grid md:grid-cols-[16.5rem_minmax(0,1fr)]">
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-sidebar-border bg-sidebar px-4 py-5 md:flex">
-        <Brand />
-        <p className="mt-3 text-xs leading-5 text-muted-foreground">
-          Abarrotes Del Valle
-          <br />
-          Mesa de control
-        </p>
-        <Suspense fallback={<SectionNav variant="side" pathname={null} />}>
-          <PathSectionNav variant="side" />
-        </Suspense>
-        {pending > 0 ? (
-          <p className="mt-4 px-2.5 text-xs text-muted-foreground">
-            {pending === 1 ? "1 orden en camino" : `${pending} órdenes en camino`}
-          </p>
-        ) : null}
-        <div className="mt-auto space-y-4">
-          <OperatorField />
-          <div>
-            <p className="text-xs text-muted-foreground">{clock ? formatLongDate(clock) : "Hora del centro"}</p>
-            <p className="text-3xl tabular-nums">{clock ? formatClock(clock) : "—"}</p>
-          </div>
-          <p className="text-[11px] leading-4 text-muted-foreground">
+    <div className="min-h-dvh bg-[#f3f5f8]">
+      <header className="flex h-12 items-center gap-3 bg-[#1578c9] px-3 text-white">
+        <button
+          type="button"
+          className="grid size-8 place-items-center rounded-md hover:bg-white/10 md:hidden"
+          aria-label={menu ? "Cerrar menú" : "Abrir menú"}
+          onClick={() => setMenu((open) => !open)}
+        >
+          {menu ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
+        <Link href="/equipos" className="flex items-center gap-2 font-semibold tracking-tight">
+          <span className="grid size-7 place-items-center rounded-md bg-white/15">
+            <Monitor className="size-4" aria-hidden />
+          </span>
+          Vigía
+        </Link>
+        <p className="hidden text-sm text-white/80 sm:block">Abarrotes Del Valle</p>
+        <div className="ml-auto">
+          <OperatorAvatar />
+        </div>
+      </header>
+
+      <div className="md:grid md:grid-cols-[15.5rem_minmax(0,1fr)]">
+        <aside className="sticky top-0 hidden h-[calc(100dvh-3rem)] flex-col border-r border-sidebar-border bg-sidebar py-3 md:flex">
+          <Suspense fallback={<SideNav pathname={null} onNavigate={() => undefined} />}>
+            <PathSideNav />
+          </Suspense>
+          <p className="mt-auto px-4 pt-4 text-[11px] leading-4 text-muted-foreground">
             En esta demo el escritorio y los agentes de las sucursales están simulados.
           </p>
-        </div>
-      </aside>
+        </aside>
 
-      <div className="min-w-0">
-        <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 md:hidden">
-          <Brand />
-          <div className="flex items-center gap-2">
-            <p className="text-sm tabular-nums">{clock ? formatClock(clock) : ""}</p>
-            <MobileOperator />
-          </div>
+        <div className="min-w-0 bg-white">
+          {fleet.storageError ? (
+            <p className="bg-alert/15 px-4 py-2 text-sm text-foreground">{fleet.storageError}</p>
+          ) : null}
+          <Suspense fallback={<main className="px-4 py-5 pb-24 md:px-8 md:py-6 md:pb-8">{children}</main>}>
+            <ShellMain>{children}</ShellMain>
+          </Suspense>
         </div>
-        {fleet.storageError ? (
-          <p className="bg-alert/15 px-4 py-2 text-sm text-foreground">{fleet.storageError}</p>
-        ) : null}
-        <Suspense fallback={<main className="mx-auto w-full max-w-6xl px-4 py-5 pb-24 md:px-8 md:py-8 md:pb-10">{children}</main>}>
-          <ShellMain>{children}</ShellMain>
-        </Suspense>
       </div>
 
-      <Suspense fallback={<SectionNav variant="bottom" pathname={null} />}>
-        <PathSectionNav variant="bottom" />
+      {menu ? (
+        <div className="fixed inset-0 top-12 z-40 bg-black/30 md:hidden" onClick={() => setMenu(false)}>
+          <aside className="h-full w-64 bg-sidebar py-3 shadow-xl" onClick={(event) => event.stopPropagation()}>
+            <Suspense fallback={<SideNav pathname={null} onNavigate={() => setMenu(false)} />}>
+              <PathSideNav onNavigate={() => setMenu(false)} />
+            </Suspense>
+          </aside>
+        </div>
+      ) : null}
+
+      <Suspense fallback={<BottomNav pathname={null} />}>
+        <PathBottomNav />
       </Suspense>
     </div>
   );
@@ -91,56 +121,37 @@ export function Shell({ children }: { children: ReactNode }) {
 
 function ShellMain({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const desk = pathname.includes("/escritorio");
+  const flush = pathname === "/equipos" || pathname.startsWith("/archivos");
   return (
-    <main
-      className={cn(
-        "mx-auto w-full px-4 py-5 pb-24 md:py-8 md:pb-10",
-        desk ? "max-w-none md:px-6" : "max-w-6xl md:px-8",
-      )}
-    >
+    <main className={cn("min-w-0", flush ? "pb-16 md:pb-0" : "px-4 py-5 pb-24 md:px-8 md:py-6 md:pb-8")}>
       {children}
     </main>
   );
 }
 
-function PathSectionNav({ variant }: { variant: "side" | "bottom" }) {
+function PathSideNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  return <SectionNav variant={variant} pathname={pathname} />;
+  return <SideNav pathname={pathname} onNavigate={onNavigate ?? (() => undefined)} />;
 }
 
-function SectionNav({ variant, pathname }: { variant: "side" | "bottom"; pathname: string | null }) {
+function SideNav({ pathname, onNavigate }: { pathname: string | null; onNavigate: () => void }) {
   return (
-    <nav
-      aria-label="Secciones"
-      className={
-        variant === "side"
-          ? "mt-8 flex flex-col gap-1"
-          : "fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-background/95 backdrop-blur md:hidden"
-      }
-    >
+    <nav aria-label="Secciones" className="flex flex-col">
       {items.map((item) => {
         const Icon = item.icon;
-        const active = pathname ? isActive(pathname, item.href) : false;
+        const active = pathname ? item.active(pathname) : false;
         return (
           <Link
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
+            onClick={onNavigate}
             className={cn(
-              variant === "side"
-                ? "flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm"
-                : "flex flex-col items-center gap-1 px-1 py-2 text-[11px]",
-              active
-                ? variant === "side"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-primary"
-                : variant === "side"
-                  ? "hover:bg-sidebar-accent"
-                  : "text-muted-foreground",
+              "mx-2 flex items-center gap-3 rounded-md px-3 py-2.5 text-sm",
+              active ? "bg-[#e7eef6] font-medium text-[#1578c9]" : "text-slate-600 hover:bg-slate-100",
             )}
           >
-            <Icon className="size-4" aria-hidden />
+            <Icon className="size-4 shrink-0" aria-hidden />
             {item.label}
           </Link>
         );
@@ -149,58 +160,60 @@ function SectionNav({ variant, pathname }: { variant: "side" | "bottom"; pathnam
   );
 }
 
-function Brand() {
+function PathBottomNav() {
+  const pathname = usePathname();
+  return <BottomNav pathname={pathname} />;
+}
+
+function BottomNav({ pathname }: { pathname: string | null }) {
+  const mobile = items.filter((item) => item.href !== "/resumen");
   return (
-    <Link href="/" className="flex items-center gap-2">
-      <span className="grid size-8 place-items-center rounded-lg bg-primary text-lg text-primary-foreground">V</span>
-      <span className="text-2xl italic">Vigía</span>
-    </Link>
+    <nav
+      aria-label="Secciones"
+      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-white md:hidden"
+    >
+      {mobile.map((item) => {
+        const Icon = item.icon;
+        const active = pathname ? item.active(pathname) : false;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex flex-col items-center gap-1 px-1 py-2 text-[11px]",
+              active ? "text-[#1578c9]" : "text-muted-foreground",
+            )}
+          >
+            <Icon className="size-4" aria-hidden />
+            {item.short}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
 
-function OperatorField() {
-  const { operator, setOperator, ready } = useFleet();
-  return <OperatorInput key={operator} operator={operator} ready={ready} onCommit={setOperator} />;
-}
-
-function OperatorInput({
-  operator,
-  ready,
-  onCommit,
-}: {
-  operator: string;
-  ready: boolean;
-  onCommit: (name: string) => void;
-}) {
-  const [value, setValue] = useState(operator);
-  return (
-    <label className="block text-xs text-muted-foreground">
-      Quién opera
-      <Input
-        className="mt-1 bg-card"
-        value={value}
-        disabled={!ready}
-        maxLength={40}
-        onChange={(event) => setValue(event.target.value)}
-        onBlur={() => onCommit(value)}
-      />
-    </label>
-  );
-}
-
-function MobileOperator() {
+function OperatorAvatar() {
   const { operator, setOperator, ready } = useFleet();
   const [open, setOpen] = useState(false);
+  const letter = operator.trim().slice(0, 1).toUpperCase() || "M";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Button variant="outline" size="sm" disabled={!ready} onClick={() => setOpen(true)}>
-        {operator.split(" ")[0]}
-      </Button>
+      <button
+        type="button"
+        disabled={!ready}
+        aria-label={`Quién opera: ${operator}`}
+        onClick={() => setOpen(true)}
+        className="grid size-8 place-items-center rounded-full bg-white/20 text-sm font-semibold hover:bg-white/30"
+      >
+        {letter}
+      </button>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Quién opera</DialogTitle>
-          <DialogDescription>Ese nombre queda en la bitácora de cada orden.</DialogDescription>
+          <DialogDescription>Ese nombre queda en los registros de cada conexión y cada archivo.</DialogDescription>
         </DialogHeader>
         {open ? (
           <OperatorDialog
@@ -232,15 +245,4 @@ function OperatorDialog({ operator, onSave }: { operator: string; onSave: (name:
       </DialogFooter>
     </>
   );
-}
-
-function useMexicoClock() {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    const update = () => setNow(new Date());
-    update();
-    const id = window.setInterval(update, 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  return now;
 }

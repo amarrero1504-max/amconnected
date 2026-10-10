@@ -9,10 +9,10 @@ export default function NotFound() {
         El panel, las sucursales y los equipos siguen donde estaban.
       </p>
       <Link
-        href="/"
+        href="/equipos"
         className="mt-6 inline-flex h-8 items-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground"
       >
-        Volver al panel
+        Volver a equipos
       </Link>
     </div>
   );

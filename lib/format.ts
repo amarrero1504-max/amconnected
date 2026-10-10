@@ -1,3 +1,23 @@
+export function formatAccess(from: number, now: number) {
+  const seconds = Math.max(0, Math.round((now - from) / 1000));
+  if (seconds < 60) return "hace un momento";
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return minutes === 1 ? "hace 1 minuto" : `hace ${minutes} minutos`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return hours === 1 ? "hace 1 hora" : `hace ${hours} horas`;
+  const days = Math.round(hours / 24);
+  if (days === 1) return "hace un día";
+  if (days < 14) return `hace ${days} días`;
+  return new Intl.DateTimeFormat("es-MX", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Mexico_City",
+  }).format(new Date(from));
+}
+
 export function formatRelative(from: number, now: number) {
   const seconds = Math.max(0, Math.round((now - from) / 1000));
   if (seconds < 15) return "ahora";

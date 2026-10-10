@@ -36,8 +36,8 @@ export function Bitacora() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-2xl">
-          <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Bitácora</p>
-          <h1 className="mt-1 text-4xl">Qué se hizo y qué pasó</h1>
+          <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">Actividad</p>
+          <h1 className="mt-1 text-4xl">Registros</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Cada escritorio que abres, archivo que editas, reinicio, bloqueo y corte de señal queda anotado con el
             nombre de quien opera.
