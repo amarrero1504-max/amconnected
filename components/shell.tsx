@@ -3,7 +3,7 @@
 import { Suspense, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderOpen, LayoutDashboard, Menu, Monitor, ScrollText, Store, X } from "lucide-react";
+import { FolderOpen, LayoutDashboard, Menu, Monitor, ScrollText, Store, TabletSmartphone, X } from "lucide-react";
 import { useFleet } from "@/components/fleet-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,13 @@ const items = [
     short: "Equipos",
     icon: Monitor,
     active: (pathname: string) => pathname === "/equipos" || pathname.startsWith("/equipos/"),
+  },
+  {
+    href: "/probar",
+    label: "Probar en mi tablet",
+    short: "Probar",
+    icon: TabletSmartphone,
+    active: (pathname: string) => pathname.startsWith("/probar"),
   },
   {
     href: "/archivos",
@@ -170,7 +177,7 @@ function BottomNav({ pathname }: { pathname: string | null }) {
   return (
     <nav
       aria-label="Secciones"
-      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-white md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-border bg-white md:hidden"
     >
       {mobile.map((item) => {
         const Icon = item.icon;

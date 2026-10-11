@@ -23,7 +23,13 @@ npm install
 npm run dev
 ```
 
-El nombre de quien opera se guarda en este navegador, igual que las órdenes de la demo. En **Bitácora** está **Restaurar demo** si quieres volver al estado inicial.
+El nombre de quien opera se guarda en este navegador, igual que las órdenes de la demo. En **Registros** está **Restaurar demo** si quieres volver al estado inicial.
+
+## Probar con tu PC y tu tablet
+
+Las dos tienen que estar en la misma Wi‑Fi. En la PC abre Vigía y entra a **Probar en mi tablet**. Pulsa **Compartir esta ventana** y, cuando el navegador pregunte, elige la pestaña de Vigía. En la tablet abre la dirección que aparece (la IP de la PC, no localhost) y escribe el código de 6 números.
+
+La tablet ve esa ventana y puede hacer clic y escribir en ella. El resto de Windows no se maneja desde el navegador.
 
 ## Qué puedes hacer
 

@@ -73,6 +73,11 @@ export function Equipos() {
     <div>
       <div className="border-b border-border px-4 py-4 md:px-6">
         <h1 className="text-xl font-medium text-slate-800">Equipos</h1>
+        <p className="mt-1 text-sm">
+          <Link href="/probar" className="text-[#1578c9] hover:underline">
+            Probar con mi PC y mi tablet
+          </Link>
+        </p>
       </div>
 
       <div className="flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:px-6">
