@@ -1,9 +1,10 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { networkInterfaces, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { lanHostsFrom } from "./lib/lan.mjs";
 import {
   BASE_PORT,
   PORT_TRIES,
@@ -11,8 +12,11 @@ import {
   claimLock,
   explainBlocked,
   explainCrash,
+  explainFirewall,
   explainInstall,
   explainStuck,
+  firewallAddArgs,
+  firewallRuleName,
   isOurPanel,
   logSaysPortTaken,
   panelUrl,
@@ -42,6 +46,45 @@ function run(command, args) {
       else reject(new Error(`${command} terminó con código ${code ?? "desconocido"}`));
     });
   });
+}
+
+function spawnQuiet(command, args) {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, { stdio: "ignore", windowsHide: true });
+    child.on("error", () => resolve(1));
+    child.on("exit", (code) => resolve(code ?? 1));
+  });
+}
+
+function announce(port) {
+  const links = lanHostsFrom(networkInterfaces(), String(port)).map((host) => `http://${host}`);
+  console.log(`En esta computadora: ${panelUrl(port)}`);
+  if (links.length === 0) {
+    console.log("No encontré una dirección de red. Revisa el cable o el Wi-Fi de esta computadora.");
+    return;
+  }
+  console.log("En el teléfono, con el Wi-Fi de este mismo módem (sin datos), abre:");
+  for (const link of links) console.log(`  ${link}`);
+}
+
+async function ensureWindowsFirewall(port) {
+  if (process.platform !== "win32") return true;
+  const name = firewallRuleName(port);
+  const present = await spawnQuiet("netsh", ["advfirewall", "firewall", "show", "rule", `name=${name}`]);
+  if (present === 0) return true;
+
+  console.log("Windows está bloqueando el teléfono. Acepta el permiso para abrir Vigía en la red.");
+  const argList = firewallAddArgs(port).map((part) => `'${part.replaceAll("'", "''")}'`).join(",");
+  const command = `Start-Process -FilePath netsh -Verb RunAs -Wait -WindowStyle Hidden -ArgumentList ${argList}`;
+  await spawnQuiet("powershell.exe", ["-NoProfile", "-Command", command]);
+  return (await spawnQuiet("netsh", ["advfirewall", "firewall", "show", "rule", `name=${name}`])) === 0;
+}
+
+async function openForLan(port) {
+  const allowed = await ensureWindowsFirewall(port);
+  announce(port);
+  if (!allowed) console.error(`\n${explainFirewall(port)}\n`);
+  openBrowser(panelUrl(port));
 }
 
 function openBrowser(url) {
@@ -103,9 +146,8 @@ async function takeOver() {
     if (claimLock(lockFile, { pid: process.pid, port: null })) return;
     const found = await waitForPeer();
     if (typeof found === "number") {
-      const url = panelUrl(found);
-      console.log(`El panel ya está abierto en ${url}`);
-      openBrowser(url);
+      console.log("El panel ya está abierto.");
+      await openForLan(found);
       process.exit(0);
     }
     if (found === "stuck") {
@@ -160,9 +202,8 @@ async function runServer(port) {
   ]);
 
   if (status === "up") {
-    const url = panelUrl(port);
-    console.log(`Listo. El panel está en ${url}`);
-    openBrowser(url);
+    console.log("Listo.");
+    await openForLan(port);
     const code = await exited;
     return { ok: true, code };
   }
@@ -200,9 +241,8 @@ for (let attempt = 0; attempt < PORT_TRIES; attempt += 1) {
   const choice = await choosePort({ base, count, probe: probePort });
 
   if (choice.action === "open") {
-    const url = panelUrl(choice.port);
-    console.log(`El panel ya está abierto en ${url}`);
-    openBrowser(url);
+    console.log("El panel ya está abierto.");
+    await openForLan(choice.port);
     process.exit(0);
   }
 

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 3847",
     "abrir": "node abrir.mjs",
-    "test": "node --test lib/launcher.test.mjs",
+    "test": "node --test lib/launcher.test.mjs lib/lan.test.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
