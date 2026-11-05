@@ -6,7 +6,7 @@ La cadena de ejemplo es **Abarrotes Del Valle**: ocho sucursales, de Guadalajara
 
 ## Cómo abrirlo
 
-En Windows, doble clic en `Abrir Vigia.bat`. En Mac o Linux:
+En Windows, doble clic en `Abrir Vigia.bat`. Si todavía no tienes esta carpeta, descarga [vigia.bat](https://raw.githubusercontent.com/amarrero1504-max/amconnected/main/vigia.bat) y ábrelo: la primera vez baja Vigía a tu carpeta de usuario y lo abre. En Mac o Linux:
 
 ```bash
 ./abrir.sh
