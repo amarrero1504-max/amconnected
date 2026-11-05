@@ -12,7 +12,7 @@ En Windows, doble clic en `Abrir Vigia.bat`. En Mac o Linux:
 ./abrir.sh
 ```
 
-Ese programa usa npm: instala lo que falte, arranca Vigía y abre el navegador en [http://localhost:3847](http://localhost:3847).
+Ese programa usa npm: instala lo que falte, arranca Vigía y abre el navegador. El panel usa el puerto 3847. Si ese puerto ya está ocupado, o Windows lo tiene reservado, abre el panel que ya está corriendo o pasa al siguiente puerto libre.
 
 Si la computadora dice que no encuentra npm ni node, instala Node.js desde [https://nodejs.org](https://nodejs.org). Node trae npm. Después vuelve a abrir el mismo archivo.
 
