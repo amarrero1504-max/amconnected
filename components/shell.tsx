@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { PhoneLink } from "@/components/phone-link";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -88,6 +89,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <OperatorAvatar />
         </div>
       </header>
+      <PhoneLink />
 
       <div className="md:grid md:grid-cols-[15.5rem_minmax(0,1fr)]">
         <aside className="sticky top-0 hidden h-[calc(100dvh-3rem)] flex-col border-r border-sidebar-border bg-sidebar py-3 md:flex">

@@ -1,4 +1,5 @@
 import os from "os";
+import { lanHostsFrom } from "@/lib/lan.mjs";
 
 export type Role = "host" | "viewer";
 
@@ -31,13 +32,7 @@ function sweep(now: number) {
 }
 
 export function lanHosts(port: string) {
-  const hosts: string[] = [];
-  for (const entries of Object.values(os.networkInterfaces())) {
-    for (const entry of entries ?? []) {
-      if (entry.family === "IPv4" && !entry.internal) hosts.push(`${entry.address}:${port}`);
-    }
-  }
-  return hosts;
+  return lanHostsFrom(os.networkInterfaces(), port);
 }
 
 export function createRoom(now: number) {

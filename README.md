@@ -6,7 +6,7 @@ La cadena de ejemplo es **Abarrotes Del Valle**: ocho sucursales, de Guadalajara
 
 ## Cómo abrirlo
 
-En Windows, doble clic en `Abrir Vigia.bat`. En Mac o Linux:
+En Windows, doble clic en `Abrir Vigia.bat`. Si solo tienes `vigia.bat`, ese archivo baja Vigía y, la siguiente vez, trae la versión nueva. En Mac o Linux:
 
 ```bash
 ./abrir.sh
@@ -27,7 +27,9 @@ El nombre de quien opera se guarda en este navegador, igual que las órdenes de 
 
 ## Probar con tu PC y tu tablet
 
-Las dos tienen que estar en la misma Wi‑Fi. En la PC abre Vigía y entra a **Probar en mi tablet**. Pulsa **Compartir esta ventana** y, cuando el navegador pregunte, elige la pestaña de Vigía. En la tablet abre la dirección que aparece (la IP de la PC, no localhost) y escribe el código de 6 números.
+La PC puede ir por cable. El teléfono tiene que estar en el Wi‑Fi de ese mismo módem, no en datos. En la PC abre Vigía y entra a **Probar en mi tablet**. Pulsa **Compartir esta ventana** y, cuando el navegador pregunte, elige la pestaña de Vigía. En el teléfono abre la dirección que aparece, con el puerto incluido (`http://192.168.1.27:3847`, no solo la IP). Escribe el código de 6 números.
+
+Al abrir Vigía, Windows pide permiso para dejar entrar por ese puerto. Hay que aceptarlo. Si la red del cable quedó como pública y el permiso no se acepta, el teléfono se queda esperando. Si el permiso ya está y sigue igual, el módem está separando el Wi‑Fi del cable.
 
 La tablet ve esa ventana y puede hacer clic y escribir en ella. El resto de Windows no se maneja desde el navegador.
 

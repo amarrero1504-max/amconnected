@@ -263,7 +263,8 @@ export function Probar() {
       <div className="border-b border-border px-4 py-4 md:px-6">
         <h1 className="text-xl font-medium text-slate-800">Probar con mi PC y mi tablet</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">
-          Las dos en la misma Wi‑Fi. La PC comparte la ventana de Vigía y la tablet la ve, hace clic y escribe ahí.
+          La PC puede ir por cable. El teléfono tiene que estar en el Wi‑Fi de ese mismo módem, no en datos. La dirección
+          lleva el puerto: sin <span className="font-medium text-slate-700">:3847</span> el teléfono se queda esperando.
         </p>
       </div>
 
@@ -313,6 +314,11 @@ export function Probar() {
                   </li>
                 ))}
               </ul>
+              <p className="mt-3 text-slate-500">
+                Primero ábrela en esta misma PC. Si aquí entra y en el teléfono dice que tardó demasiado, acepta el
+                permiso de Windows al abrir Vigía. Si ya lo aceptaste y sigue igual, el módem no deja que el Wi‑Fi hable
+                con el cable: en el módem desactiva el aislamiento de clientes, o conecta esta PC también por Wi‑Fi.
+              </p>
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500">
