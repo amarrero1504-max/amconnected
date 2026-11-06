@@ -160,6 +160,11 @@ export function Probar() {
         setError(created.error ?? "No pude abrir la prueba.");
         return;
       }
+      const selfHost = window.location.host;
+      const serverHosts: string[] = created.hosts ?? [];
+      const allHosts = selfHost && !/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(selfHost) && !serverHosts.includes(selfHost)
+        ? [selfHost, ...serverHosts]
+        : serverHosts;
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: false,
@@ -181,7 +186,7 @@ export function Probar() {
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === "connected") setStatus("La tablet ya ve esta ventana.");
       };
-      setHosts(created.hosts ?? []);
+      setHosts(allHosts);
       setCode(created.code);
       setPhase("host");
       setStatus("En la tablet abre Vigía, entra a Probar y escribe este código.");
@@ -263,8 +268,10 @@ export function Probar() {
       <div className="border-b border-border px-4 py-4 md:px-6">
         <h1 className="text-xl font-medium text-slate-800">Probar con mi PC y mi tablet</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500">
-          La PC puede ir por cable. El teléfono tiene que estar en el Wi‑Fi de ese mismo módem, no en datos. La dirección
-          lleva el puerto: sin <span className="font-medium text-slate-700">:3847</span> el teléfono se queda esperando.
+          La PC y la tablet tienen que estar en la misma red — la de la sucursal o la de la oficina central. Si la tablet
+          está en datos, la conexión de video no levanta. La dirección lleva el puerto: sin{" "}
+          <span className="font-medium text-slate-700">:3847</span> la tablet se queda esperando. Si el servidor está
+          fuera (en otra oficina o en la nube), en la tablet abre la misma dirección que usas tú en la PC.
         </p>
       </div>
 
@@ -306,7 +313,7 @@ export function Probar() {
           <p className="mt-3 text-5xl font-medium tracking-[0.25em] text-[#1578c9]">{code}</p>
           {hosts.length > 0 ? (
             <div className="mt-4 text-sm">
-              <p className="text-slate-500">En la tablet abre una de estas direcciones:</p>
+              <p className="text-slate-500">En la tablet abre una de estas direcciones y entra a <strong>Probar</strong>:</p>
               <ul className="mt-2 space-y-1">
                 {hosts.map((host) => (
                   <li key={host}>
@@ -315,15 +322,18 @@ export function Probar() {
                 ))}
               </ul>
               <p className="mt-3 text-slate-500">
-                Primero ábrela en esta misma PC. Si aquí entra y en el teléfono dice que tardó demasiado, acepta el
-                permiso de Windows al abrir Vigía. Si ya lo aceptaste y sigue igual, el módem no deja que el Wi‑Fi hable
-                con el cable: en el módem desactiva el aislamiento de clientes, o conecta esta PC también por Wi‑Fi.
+                La primera dirección es la que usas tú desde esta PC — pruébala primero en la tablet. Las siguientes son
+                IPs de red local y sólo sirven si la tablet está en el mismo Wi‑Fi o cable que el servidor.
+              </p>
+              <p className="mt-2 text-slate-500">
+                Si la tablet abre la dirección pero el video no levanta, el módem puede tener el Wi‑Fi y el cable
+                separados (aislamiento de clientes). En ese caso conecta la PC también por Wi‑Fi, o desactiva el
+                aislamiento en el módem.
               </p>
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500">
-              En la tablet abre la misma dirección de esta PC, cambiando localhost por la IP de la computadora, y entra a
-              Probar.
+              En la tablet abre la misma dirección de Vigía que usas en esta PC, entra a Probar y escribe el código.
             </p>
           )}
           <Button className="mt-6" variant="outline" onClick={() => void stop(true)}>
